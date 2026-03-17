@@ -14,7 +14,7 @@ The panel is designed to manage a PowerDNS authoritative server through its HTTP
 - Record management
 - SOA editing
 - DNSSEC toggle from zone editing
-- Native and Slave zone support
+- Native, Master and Slave zone support
 - Read-only behavior for slave zones
 - Per-zone diagnostics using `dig`
 - Responsive interface
@@ -104,10 +104,14 @@ The panel supports:
 Supported zone types:
 
 - `Native`
+- `Master`
 - `Slave`
 
 ### Native zones
 Native zones can be edited normally.
+
+### Master zones
+Master zones can be edited normally.
 
 ### Slave zones
 Slave zones are treated as read-only for records and SOA, which matches PowerDNS behavior more naturally.
