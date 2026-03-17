@@ -31,7 +31,12 @@
           $masters = $zone['masters'] ?? [];
         ?>
         <tr>
-          <td><?= h($zone['name']); ?></td>
+          <td>
+            <span class="zone-name-ellipsis" title="<?= h($zone['name']); ?>">
+              <?= h($zone['name']); ?>
+            </span>
+          </td>
+
           <td><?= h($zone['kind'] ?? ''); ?></td>
           <td>
             <?php if ($isSlave): ?>

@@ -27,7 +27,8 @@ $isSlave = ($zoneType === 'Slave');
     <label>Zone type</label>
     <select name="zone_type" id="zone-type-select" disabled>
       <option value="Native" <?= $zoneType === 'Native' ? 'selected' : ''; ?>>Native</option>
-      <!-- <option value="Slave" <?= $zoneType === 'Slave' ? 'selected' : ''; ?>>Slave</option> -->
+      <option value="Master" <?= $zoneType === 'Master' ? 'selected' : ''; ?>>Master</option>
+      <option value="Slave" <?= $zoneType === 'Slave' ? 'selected' : ''; ?>>Slave</option>
     </select>
     <input type="hidden" name="zone_type" value="<?= h($zoneType); ?>">
 

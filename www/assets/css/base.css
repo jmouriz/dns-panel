@@ -22,3 +22,6 @@ a{color:var(--primary);text-decoration:none} a:hover{text-decoration:underline}
 @media(max-width:900px){.grid.two{grid-template-columns:1fr}}
 @media(max-width:640px){.table{display:block;overflow-x:auto}}
 .diag-output{white-space:pre-wrap;word-break:break-word;overflow-x:auto;background:var(--surface-2);border:1pxsolidvar(--border);border-radius:10px;padding:1rem;margin:0}
+.content-ellipsis{max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.zone-name-ellipsis{display:inline-block;max-width:320px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;vertical-align:bottom;}
+.zone-name-ellipsis.heading{max-width:520px;vertical-align:middle;}

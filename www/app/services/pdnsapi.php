@@ -218,6 +218,28 @@ function pdns_create_native_zone(string $zoneName, string $primaryNs, string $ho
     ]);
 }
 
+function pdns_create_master_zone(string $zoneName, string $primaryNs, string $hostmaster, bool $dnssec = false): void {
+    $cfg = pdns_config();
+
+    $zone = normalize_zone_name($zoneName);
+    $ns = rtrim(trim($primaryNs), '.');
+    $ns = substr_count($ns, '.') ? $ns . '.' : $ns . '.' . rtrim($zoneName, '.') . '.';
+    $hm = rtrim(str_replace('@', '.', trim($hostmaster)), '.') . '.';
+
+    pdns_request('POST', '/api/v1/servers/' . rawurlencode($cfg['server_id']) . '/zones', [
+        'name' => $zone,
+        'kind' => 'Master',
+        'nameservers' => [$ns],
+        'dnssec' => $dnssec,
+        'api_rectify' => true,
+    ]);
+
+    $soaContent = $ns . ' ' . $hm . ' 1 10800 3600 604800 3600';
+    pdns_replace_rrset($zone, $zone, 'SOA', 3600, [
+        ['content' => $soaContent, 'disabled' => false]
+    ]);
+}
+
 function pdns_create_slave_zone(string $zoneName, array $masters): void {
     $cfg = pdns_config();
 

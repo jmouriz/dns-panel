@@ -1,4 +1,12 @@
-<section class="page-actions"><h1>SOA - <?= h($zone); ?></h1><a class="button secondary" href="index.php?action=zones">Back</a></section>
+<section class="page-actions">
+<h1>
+  SOA -
+  <span class="zone-name-ellipsis heading" title="<?= h($data['name'] ?? $zone); ?>">
+    <?= h($data['name'] ?? $zone); ?>
+  </span>
+</h1>
+<a class="button secondary" href="index.php?action=zones">Back</a>
+</section>
 <?php if ($flash): ?><div class="alert alert-<?= h($flash['type']); ?>"><?= h($flash['message']); ?></div><?php endif; ?>
 <?php if (!empty($errors)): ?><div class="alert alert-danger"><?php foreach ($errors as $e): ?><div><?= h($e); ?></div><?php endforeach; ?></div><?php endif; ?>
 <div class="card card-form">

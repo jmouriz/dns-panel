@@ -40,7 +40,8 @@ function handle_zones_create(): void {
         $zoneType = trim($data['zone_type'] ?? 'Native');
         $zoneName = trim($data['name'] ?? '');
 
-        if ($zoneType !== 'Native' && $zoneType !== 'Slave') {
+        if ($zoneType !== 'Native' && $zoneType !== 'Master' &&
+            $zoneType !== 'Slave') {
             $errors[] = 'Invalid zone type.';
         }
 
@@ -64,10 +65,19 @@ function handle_zones_create(): void {
             }
         }
 
+	// TODO validate Master
+
         if (!$errors) {
             try {
                 if ($zoneType === 'Native') {
                     pdns_create_native_zone(
+                        $data['name'],
+                        $data['primary_ns'],
+                        $data['hostmaster'],
+                        ($data['dnssec'] ?? '0') === '1'
+                    );
+                } elseif ($zoneType === 'Master') {
+                    pdns_create_master_zone(
                         $data['name'],
                         $data['primary_ns'],
                         $data['hostmaster'],
@@ -114,7 +124,8 @@ function handle_zones_edit(): void {
         $zoneData = pdns_get_zone($zone);
         $isSlave = strcasecmp($zoneData['kind'] ?? '', 'Slave') === 0;
 
-        $data['zone_type'] = $isSlave ? 'Slave' : 'Native';
+        //$data['zone_type'] = $isSlave ? 'Slave' : 'Native';
+        $data['zone_type'] = $zoneData['kind'] ?? 'Native';
         $data['name'] = $zoneData['name'] ?? $zone;
         $data['dnssec'] = !empty($zoneData['dnssec']) ? '1' : '0';
 

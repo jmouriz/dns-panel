@@ -1,5 +1,10 @@
 <section class="page-actions">
-  <h1>Records - <?= h($zone); ?></h1>
+  <h1>
+    Records - 
+    <span class="zone-name-ellipsis heading" title="<?= h($data['name'] ?? $zone); ?>">
+      <?= h($data['name'] ?? $zone); ?>
+    </span>
+  </h1>
   <div class="actions-inline">
     <?php if (!$isSlave && can_access_zone(current_user(), $zone) && can(current_user(), 'records.edit')): ?>
       <a class="button" href="index.php?action=records_add&zone=<?= urlencode($zone); ?>">Add record</a>

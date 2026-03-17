@@ -21,13 +21,14 @@ $zoneType = $data['zone_type'] ?? 'Native';
     <label>Zone type</label>
     <select name="zone_type" id="zone-type-select">
       <option value="Native" <?= $zoneType === 'Native' ? 'selected' : ''; ?>>Native</option>
+      <option value="Master" <?= $zoneType === 'Master' ? 'selected' : ''; ?>>Master</option>
       <option value="Slave" <?= $zoneType === 'Slave' ? 'selected' : ''; ?>>Slave</option>
     </select>
 
     <label>Zone name</label>
     <input type="text" name="name" value="<?= h($data['name'] ?? ''); ?>" required>
 
-    <div id="zone-native-fields" style="<?= $zoneType === 'Native' ? '' : 'display:none;'; ?>">
+    <div id="zone-native-fields" style="<?= $zoneType !== 'Slave' ? '' : 'display:none;'; ?>">
       <label>Primary NS</label>
       <input
         type="text"
@@ -77,19 +78,20 @@ document.addEventListener('DOMContentLoaded', function () {
   if (!typeSelect || !nativeFields || !slaveFields) return;
 
   function syncZoneType() {
-    const isNative = typeSelect.value === 'Native';
-    nativeFields.style.display = isNative ? '' : 'none';
-    slaveFields.style.display = isNative ? 'none' : '';
+    const isNotSlave = typeSelect.value !== 'Slave';
+    //const isNative = typeSelect.value === 'Native';
+    nativeFields.style.display = isNotSlave ? '' : 'none';
+    slaveFields.style.display = isNotSlave ? 'none' : '';
 
     nativeFields.querySelectorAll('input').forEach(function (el) {
       if (el.name === 'primary_ns' || el.name === 'hostmaster') {
-        el.required = isNative;
+        el.required = isNotSlave;
       }
     });
 
     slaveFields.querySelectorAll('input').forEach(function (el) {
       if (el.name === 'masters') {
-        el.required = !isNative;
+        el.required = !isNotSlave;
       }
     });
   }

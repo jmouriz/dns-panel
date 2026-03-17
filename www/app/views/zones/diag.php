@@ -1,5 +1,10 @@
 <section class="page-actions">
-  <h1>Diagnostics - <?= h($zone); ?></h1>
+  <h1>
+    Diagnostics -
+    <span class="zone-name-ellipsis heading" title="<?= h($data['name'] ?? $zone); ?>">
+      <?= h($data['name'] ?? $zone); ?>
+    </span>
+  </h1>
   <a class="button secondary" href="index.php?action=zones">Back</a>
 </section>
 
