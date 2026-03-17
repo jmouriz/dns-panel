@@ -1,0 +1,7 @@
+services:
+  panel:
+    build: .
+    container_name: dns-panel
+    ports:
+      - "8080:80"
+    restart: unless-stopped

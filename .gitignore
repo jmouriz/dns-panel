@@ -1,0 +1,22 @@
+# runtime data
+www/storage/panel.sqlite
+www/storage/uploads/*
+!www/storage/uploads/.gitkeep
+
+# archives
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+
+# logs
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+www/storage/*
+!www/storage/.gitkeep
+!www/storage/uploads/
+!www/storage/uploads/.gitkeep
