@@ -1,4 +1,136 @@
 <?php
+function zones_clone_replace_domain(string $value, string $sourceZone, string $targetZone): string {
+    $src = rtrim($sourceZone, '.');
+    $dst = rtrim($targetZone, '.');
+
+    return str_ireplace($src, $dst, $value);
+}
+
+function zones_clone_skip_rrset(string $type): bool {
+    return in_array(strtoupper($type), [
+        'RRSIG',
+        'NSEC',
+        'NSEC3',
+        'NSEC3PARAM',
+        'DNSKEY',
+        'CDNSKEY',
+        'CDS',
+    ], true);
+}
+
+function handle_zones_clone(): void {
+    require_permission('zones.create');
+
+    $errors = [];
+    $zones = [];
+    $data = [
+        'source_zone' => '',
+        'target_zone' => '',
+    ];
+
+    try {
+        $zones = pdns_list_zones();
+        $user = current_user();
+        if (!user_has_role($user, 'administrator')) {
+            $allowed = users_get_zone_access((int)$user['id']);
+            $zones = array_values(array_filter($zones, function ($zone) use ($allowed) {
+                return in_array($zone['name'], $allowed, true);
+            }));
+        }
+    } catch (Throwable $e) {
+        $errors[] = $e->getMessage();
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        csrf_check();
+
+        $data['source_zone'] = normalize_zone_name($_POST['source_zone'] ?? '');
+        $data['target_zone'] = normalize_zone_name($_POST['target_zone'] ?? '');
+
+        if ($data['source_zone'] === '') {
+            $errors[] = 'Source zone is required.';
+        }
+
+        if ($data['target_zone'] === '') {
+            $errors[] = 'Target zone is required.';
+        }
+
+        if ($data['source_zone'] !== '' && $data['target_zone'] !== '' && $data['source_zone'] === $data['target_zone']) {
+            $errors[] = 'Source and target zones must be different.';
+        }
+
+        if (!$errors) {
+            try {
+                $source = pdns_get_zone($data['source_zone']);
+                $kind = strtoupper($source['kind'] ?? 'NATIVE');
+
+                if ($kind === 'SLAVE') {
+                    throw new RuntimeException('Slave zones cannot be copied.');
+                }
+
+                $soaRrset = null;
+                foreach (($source['rrsets'] ?? []) as $rrset) {
+                    if (strtoupper($rrset['type'] ?? '') === 'SOA') {
+                        $soaRrset = $rrset;
+                        break;
+                    }
+                }
+
+                if (!$soaRrset || empty($soaRrset['records'][0]['content'])) {
+                    throw new RuntimeException('Source zone has no SOA record.');
+                }
+
+                $soa = parse_soa($soaRrset['records'][0]['content']);
+                $primaryNs = zones_clone_replace_domain((string)($soa['primary_ns'] ?? ''), $data['source_zone'], $data['target_zone']);
+                $hostmaster = zones_clone_replace_domain((string)($soa['hostmaster'] ?? ''), $data['source_zone'], $data['target_zone']);
+
+                $dnssec = !empty($source['dnssec']);
+
+                if ($kind === 'MASTER') {
+                    pdns_create_master_zone($data['target_zone'], $primaryNs, $hostmaster, $dnssec);
+                } else {
+                    pdns_create_native_zone($data['target_zone'], $primaryNs, $hostmaster, $dnssec);
+                }
+
+                foreach (($source['rrsets'] ?? []) as $rrset) {
+                    $type = strtoupper($rrset['type'] ?? '');
+
+                    if (zones_clone_skip_rrset($type)) {
+                        continue;
+                    }
+
+                    $newName = zones_clone_replace_domain((string)($rrset['name'] ?? ''), $data['source_zone'], $data['target_zone']);
+                    $newTtl = (int)($rrset['ttl'] ?? 3600);
+
+                    $newRecords = [];
+                    foreach (($rrset['records'] ?? []) as $record) {
+                        $newRecords[] = [
+                            'content' => zones_clone_replace_domain((string)($record['content'] ?? ''), $data['source_zone'], $data['target_zone']),
+                            'disabled' => !empty($record['disabled']),
+                        ];
+                    }
+
+                    if ($newRecords) {
+                        pdns_replace_rrset($data['target_zone'], $newName, $type, $newTtl, $newRecords);
+                    }
+                }
+
+                flash_set('success', 'Zone copied successfully.');
+                redirect('index.php?action=records&zone=' . urlencode($data['target_zone']));
+            } catch (Throwable $e) {
+                $errors[] = $e->getMessage();
+            }
+        }
+    }
+
+    render('zones/clone', [
+        'zones' => $zones,
+        'data' => $data,
+        'errors' => $errors,
+        'flash' => flash_get(),
+    ]);
+}
+
 function handle_zones(): void {
     require_login();
     $zones = [];

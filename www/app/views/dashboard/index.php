@@ -1,3 +1,4 @@
+<?php $pdnsUrl = rtrim(settings_get('pdns.url', ''), '/'); ?>
 <?php if ($flash): ?><div class="alert alert-<?= h($flash['type']); ?>"><?= h($flash['message']); ?></div><?php endif; ?>
 <section class="grid two">
   <div class="card">
@@ -21,3 +22,13 @@
     </div>
   </div>
 </section>
+<?php if ($pdnsUrl !== ''): ?>
+<section class="card">
+  <h2>PowerDNS status</h2>
+  <iframe src="<?= h($pdnsUrl); ?>/"
+    title="PowerDNS Web UI"
+    style="width:100%; height:700px; border:0; display:block;"
+    loading="lazy" referrerpolicy="no-referrer">
+  </iframe>
+</section>
+<?php endif; ?>

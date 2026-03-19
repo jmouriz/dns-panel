@@ -1,7 +1,10 @@
 <section class="page-actions">
   <h1>Zones</h1>
   <?php if (can(current_user(), 'zones.create')): ?>
-    <a class="button" href="index.php?action=zones_create">Create zone</a>
+    <div class="actions-inline">
+      <a class="button" href="index.php?action=zones_create">Create zone</a>
+      <a class="button secondary" href="index.php?action=zones_clone">Copy zone</a>
+    </div>
   <?php endif; ?>
 </section>
 

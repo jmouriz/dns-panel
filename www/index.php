@@ -42,6 +42,7 @@ $routes = [
     'zones_soa' => 'zones.php',
     'zones_dnssec' => 'zones.php',
     'zones_diag' => 'zones.php',
+    'zones_clone' => 'zones.php',
     'records' => 'records.php',
     'records_add' => 'records.php',
     'records_edit' => 'records.php',
