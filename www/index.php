@@ -35,6 +35,7 @@ $routes = [
     'login' => 'auth.php',
     'logout' => 'auth.php',
     'dashboard' => 'dashboard.php',
+    'pdns_status' => 'dashboard.php',
     'zones' => 'zones.php',
     'zones_create' => 'zones.php',
     'zones_edit' => 'zones.php',

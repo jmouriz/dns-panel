@@ -25,7 +25,7 @@
 <?php if ($pdnsUrl !== ''): ?>
 <section class="card">
   <h2>PowerDNS status</h2>
-  <iframe src="<?= h($pdnsUrl); ?>/"
+  <iframe src="index.php?action=pdns_status"
     title="PowerDNS Web UI"
     style="width:100%; height:700px; border:0; display:block;"
     loading="lazy" referrerpolicy="no-referrer">
