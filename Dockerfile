@@ -20,7 +20,6 @@ RUN ln -sf /usr/bin/php85 /usr/bin/php && \
 
 COPY lighttpd.conf /etc/lighttpd/lighttpd.conf
 COPY haproxy.cfg /etc/haproxy/haproxy.cfg
-COPY bootstrap-install-panel.php /usr/local/bin/bootstrap-install-panel.php
 COPY entrypoint.sh /entrypoint.sh
 COPY www/ /var/www/localhost/htdocs/
 

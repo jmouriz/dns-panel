@@ -219,6 +219,60 @@ read_value() {
   printf '%s\n' "${value:-$default}"
 }
 
+normalize_installation_mode() {
+  local mode="${1,,}"
+
+  case "$mode" in
+    web|w)
+      printf 'web\n'
+      ;;
+    console|consola|c)
+      printf 'console\n'
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+select_installation_mode() {
+  local configured="${DNS_PANEL_BOOTSTRAP_MODE:-}"
+  local selected
+  local normalized
+
+  if [ -n "$configured" ]; then
+    if normalized="$(normalize_installation_mode "$configured")"; then
+      printf '%s\n' "$normalized"
+      return
+    fi
+
+    echo "DNS_PANEL_BOOTSTRAP_MODE debe ser web o console." >&2
+    exit 1
+  fi
+
+  if [ ! -t 0 ]; then
+    printf 'web\n'
+    return
+  fi
+
+  echo "El panel todavía no está inicializado." >&2
+  echo "Podés continuar la configuración de dos formas:" >&2
+  echo "  web     abre el instalador en el navegador" >&2
+  echo "  consola pide los datos iniciales ahora mismo" >&2
+
+  while true; do
+    read -r -p "¿Cómo querés seguir? [web/consola] (web): " selected
+    selected="${selected:-web}"
+
+    if normalized="$(normalize_installation_mode "$selected")"; then
+      printf '%s\n' "$normalized"
+      return
+    fi
+
+    echo "Opción inválida. Escribí web o consola." >&2
+  done
+}
+
 resolve_pdns_api_key() {
   if [ -n "${PDNS_API_KEY:-}" ]; then
     printf '%s\n' "$PDNS_API_KEY"
@@ -230,13 +284,7 @@ resolve_pdns_api_key() {
   fi
 }
 
-ensure_panel_installation() {
-  if [ -s "$PANEL_DB" ]; then
-    return 0
-  fi
-
-  echo "No existe ${PANEL_DB}; se inicializará la configuración del panel."
-
+install_panel_from_console() {
   local admin_user="${DNS_PANEL_ADMIN_USER:-}"
   local admin_display_name="${DNS_PANEL_ADMIN_DISPLAY_NAME:-}"
   local admin_password="${DNS_PANEL_ADMIN_PASSWORD:-}"
@@ -286,9 +334,36 @@ ensure_panel_installation() {
     -e DNS_PANEL_SUBTITLE="$panel_subtitle" \
     -e DNS_PANEL_LOGO="$panel_logo" \
     dns-panel-panel:latest \
-    php /usr/local/bin/bootstrap-install-panel.php
+    php /var/www/localhost/htdocs/install.php
 
   echo "Panel inicializado. Recordá guardar la clave del usuario ${admin_user}."
+}
+
+prepare_panel_web_installation() {
+  mkdir -p "$PANEL_UPLOADS"
+
+  echo "Configuración web seleccionada."
+  echo "El contenedor se levantará con el instalador web disponible en el navegador."
+}
+
+ensure_panel_installation() {
+  local mode
+
+  if [ -s "$PANEL_DB" ]; then
+    return 0
+  fi
+
+  echo "No existe ${PANEL_DB}; se debe inicializar la configuración del panel."
+
+  mode="$(select_installation_mode)"
+  case "$mode" in
+    web)
+      prepare_panel_web_installation
+      ;;
+    console)
+      install_panel_from_console
+      ;;
+  esac
 }
 
 install_renewal_cron() {
