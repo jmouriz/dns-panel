@@ -1,4 +1,8 @@
 # runtime data
+certs/
+bootstrap-admin.txt
+bootstrap-renew.log
+.backup-bootstrap-*/
 www/storage/panel.sqlite
 www/storage/uploads/*
 !www/storage/uploads/.gitkeep

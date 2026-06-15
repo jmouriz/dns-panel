@@ -2,6 +2,7 @@ FROM alpine
 
 RUN apk add --no-cache \
 	lighttpd \
+	haproxy \
 	php85 \
 	php85-cgi \
 	php85-curl \
@@ -14,13 +15,16 @@ RUN apk add --no-cache \
 	bash
 
 RUN ln -sf /usr/bin/php85 /usr/bin/php && \
-    mkdir -p /var/www/localhost/htdocs /run/lighttpd /var/log/lighttpd
+    mkdir -p /var/www/localhost/htdocs /run/lighttpd /var/log/lighttpd /var/empty && \
+    chown haproxy:haproxy /var/empty
 
 COPY lighttpd.conf /etc/lighttpd/lighttpd.conf
+COPY haproxy.cfg /etc/haproxy/haproxy.cfg
+COPY bootstrap-install-panel.php /usr/local/bin/bootstrap-install-panel.php
 COPY entrypoint.sh /entrypoint.sh
 COPY www/ /var/www/localhost/htdocs/
 
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 80
+EXPOSE 8080
 ENTRYPOINT ["/entrypoint.sh"]

@@ -1,7 +1,11 @@
 services:
   panel:
+    image: dns-panel-panel:latest
     build: .
     container_name: dns-panel
     ports:
-      - "8080:80"
+      - "${DNS_PANEL_BOOTSTRAP_PORT:-8080}:8080"
+    volumes:
+      - ./certs/bootstrap.pem:/etc/lighttpd/certs/bootstrap.pem:ro
+      - ./www/storage:/var/www/localhost/htdocs/storage
     restart: unless-stopped
